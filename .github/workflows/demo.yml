@@ -9,6 +9,14 @@ jobs:
         steps:
             - name: Get code
               uses: actions/checkout@v3
+            # to add caching we must add a step before
+            # the step we want to cache
+            - name: Cache Dependencies
+              uses: actions/cache@v3
+              with:
+                path: ~/.npm
+                # give the key a dynamic part to make it unique
+                key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
             - name: Install dependencies
               run: npm ci
             - name: Lint code
@@ -25,6 +33,12 @@ jobs:
         steps:
             - name: Get code
               uses: actions/checkout@v3
+            - name: Cache Dependencies
+              uses: actions/cache@v3
+              with:
+                path: ~/.npm
+                # give the key a dynamic part to make it unique
+                key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
             - name: Install dependencies
               run: npm ci
             - name: Build website
