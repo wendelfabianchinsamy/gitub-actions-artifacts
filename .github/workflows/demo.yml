@@ -18,6 +18,10 @@ jobs:
     build:
         needs: test
         runs-on: ubuntu-latest
+        # if you generate an output you must have the outputs key
+        outputs:
+          # we can do this because we set the id in the step
+          script-file: ${{ steps.publish.outputs.script-file }}
         steps:
             - name: Get code
               uses: actions/checkout@v3
@@ -25,6 +29,11 @@ jobs:
               run: npm ci
             - name: Build website
               run: npm run build
+            # jobs can produce outputs
+            - name: Publish JS filename
+              # add an id so we can refer to it
+              id: publish
+              run: find dist/assets/*.js -type f -execdir echo 'script-file=script-file::{}' >> $GITHUB_OUTPUT ';'
             # uploading aftifacts
             - name: Upload artifacts
               uses: actions/upload-artifact@v3
@@ -49,5 +58,8 @@ jobs:
             # but the contents will exist
             - name: Output contents
               run: ls
+            # this is how we can can get the output in another job
+            - name: Output filename
+              run: echo "${{ needs.build.outputs.script-file }}"
             - name: Deploy
               run: echo "Deploying..."
